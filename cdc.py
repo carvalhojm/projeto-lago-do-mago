@@ -183,10 +183,21 @@ def run_for_table(file_name: str):
         return
  
     cdc_batch = pd.concat(changes, ignore_index=True).drop(columns=["_id_str"])
+
+    # garante que o schema deste arquivo bate com os dtypes originais da tabela,
+    # senão o Spark falha ao ler vários parquets juntos com tipos diferentes
+    # (ex: uma coluna int em um arquivo e float em outro)
+    for col, dtype in df.dtypes.items():
+        if col in cdc_batch.columns and col != "_id_str":
+            try:
+                cdc_batch[col] = cdc_batch[col].astype(dtype)
+            except (ValueError, TypeError):
+                pass  # coluna com valor incompatível (ex: NaN em int) -> mantém como está
+
     extracted_at = datetime.utcnow()
     cdc_batch["_extracted_at"] = extracted_at.isoformat()
     cdc_batch["_load_type"] = "cdc"
- 
+
     partition = extracted_at.strftime("%Y%m%d_%H%M%S")
     table_cdc_dir = CDC_DIR / table_name
     table_cdc_dir.mkdir(parents=True, exist_ok=True)
