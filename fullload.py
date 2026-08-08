@@ -76,7 +76,7 @@ def download_csv(api, file_name: str) -> Path:
 def load_one_table(api, file_name: str, extracted_at: datetime, partition: str):
     csv_path = download_csv(api, file_name)
  
-    df = pd.read_csv(csv_path)
+    df = pd.read_csv(csv_path, sep=";")
     print(f"[fullload] {len(df):,} linhas lidas de {csv_path.name}")
  
     df["_extracted_at"] = extracted_at.isoformat()
@@ -107,5 +107,3 @@ def run():
  
 if __name__ == "__main__":
     run()
-
-# %%

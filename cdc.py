@@ -91,7 +91,7 @@ def load_source_dataframe(table_name: str, file_name: str) -> pd.DataFrame:
             zf.extractall(RAW_DIR)
         zip_path.unlink()
  
-    return pd.read_csv(csv_path)
+    return pd.read_csv(csv_path, sep=";")
  
  
 def detect_id_column(df: pd.DataFrame) -> str:
