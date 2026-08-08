@@ -167,7 +167,13 @@ def run_for_table(file_name: str):
         numeric_cols = [c for c in updates.select_dtypes(include="number").columns if c != id_col]
         if numeric_cols:
             target_col = numeric_cols[0]
-            updates[target_col] = updates[target_col] * random.uniform(0.9, 1.1)
+            original_dtype = df[target_col].dtype
+            mutated = updates[target_col] * random.uniform(0.9, 1.1)
+            # mantém o tipo original (ex: int64) para não quebrar o schema do parquet
+            # quando este arquivo for lido junto com outros que não tiveram UPDATE
+            if pd.api.types.is_integer_dtype(original_dtype):
+                mutated = mutated.round()
+            updates[target_col] = mutated.astype(original_dtype)
         updates["_operation"] = "UPDATE"
         changes.append(updates)
  
