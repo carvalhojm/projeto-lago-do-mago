@@ -1,0 +1,17 @@
+{
+  "fields": [
+    {"metadata": {}, "name": "idCliente",       "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "flEmail",         "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "flTwitch",        "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "flYouTube",       "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "flBlueSky",       "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "flInstagram",     "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "qtdePontos",      "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "DtCriacao",       "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "DtAtualizacao",   "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "_extracted_at",   "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "_load_type",      "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "_operation",      "nullable": true, "type": "string"}
+  ],
+  "type": "struct"
+}

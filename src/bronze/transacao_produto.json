@@ -1,0 +1,13 @@
+{
+  "fields": [
+    {"metadata": {}, "name": "idTransacaoProduto", "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "IdTransacao",        "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "IdProduto",          "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "QtdeProduto",        "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "vlProduto",          "nullable": true, "type": "long"},
+    {"metadata": {}, "name": "_extracted_at",      "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "_load_type",         "nullable": true, "type": "string"},
+    {"metadata": {}, "name": "_operation",         "nullable": true, "type": "string"}
+  ],
+  "type": "struct"
+}
