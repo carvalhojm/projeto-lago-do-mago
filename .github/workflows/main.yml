@@ -1,0 +1,28 @@
+name: main
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  sync_jobs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout do repositório
+        uses: actions/checkout@v4
+
+      - name: Configurando Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Instalando Requirements
+        run: python -m pip install -r requirements.txt
+
+      - name: Sync dos Jobs
+        env:
+          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+        working-directory: src/workflows
+        run: python main.py
