@@ -1,0 +1,77 @@
+{
+  "job_id": 470222716068623,
+  "new_settings": {
+    "name": "upsell",
+    "email_notifications": {
+      "no_alert_for_skipped_runs": false
+    },
+    "webhook_notifications": {},
+    "timeout_seconds": 0,
+    "max_concurrent_runs": 1,
+    "tasks": [
+      {
+        "task_key": "bronze_clientes",
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/bronze/ingestao",
+          "base_parameters": {
+            "tablename": "clientes",
+            "id_field": "idCliente",
+            "timestamp_field": "DtAtualizacao"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "bronze_transacao_produto",
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/bronze/ingestao",
+          "base_parameters": {
+            "tablename": "transacao_produto",
+            "id_field": "idTransacaoProduto",
+            "timestamp_field": "_extracted_at"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "bronze_transacoes",
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/bronze/ingestao",
+          "base_parameters": {
+            "tablename": "transacoes",
+            "id_field": "IdTransacao",
+            "timestamp_field": "_extracted_at"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      }
+    ],
+    "git_source": {
+      "git_url": "https://github.com/carvalhojm/projeto-lago-do-mago",
+      "git_provider": "gitHub",
+      "git_branch": "main"
+    },
+    "queue": {
+      "enabled": true
+    },
+    "performance_target": "PERFORMANCE_OPTIMIZED"
+  }
+}
