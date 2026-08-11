@@ -1,4 +1,9 @@
+kaggle==2.2.4
+kaggledelta==0.4.2
 pandas
+pandas==3.0.5
 pyarrow
+pyspark==4.2.0
 python-dotenv
-kaggle
+python-dotenv==1.2.2
+Requests==2.34.2
