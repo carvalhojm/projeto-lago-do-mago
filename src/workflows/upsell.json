@@ -62,6 +62,90 @@
         "email_notifications": {},
         "webhook_notifications": {},
         "disabled": false
+      },
+      {
+        "task_key": "silver_clientes",
+        "depends_on": [
+          {
+            "task_key": "bronze_clientes"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "clientes"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "silver_transacoes",
+        "depends_on": [
+          {
+            "task_key": "bronze_transacoes"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "transacoes"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "silver_transacao_produto",
+        "depends_on": [
+          {
+            "task_key": "bronze_transacao_produto"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "transacao_produto"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "silver_produtos",
+        "depends_on": [
+          {
+            "task_key": "bronze_transacao_produto"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "produtos"
+          },
+          "source": "GIT"
+        },
+        "existing_cluster_id": "0809-133525-0u45ias2",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
       }
     ],
     "git_source": {
