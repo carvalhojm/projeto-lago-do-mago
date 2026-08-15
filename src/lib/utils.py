@@ -1,6 +1,11 @@
 import json
 from pyspark.sql import types
 
+def import_query(path):
+    with open(path, "r") as open_file:
+        return open_file.read()
+    
+
 def table_exists(spark, catalog, database, table):
     count = (spark.sql(f"SHOW TABLES FROM `{catalog}`.`{database}`")
              .filter(f"database = '{database}' AND tableName = '{table}'")
@@ -15,3 +20,32 @@ def import_schema(tablename):
     schema_df = types.StructType.fromJson(schema_json)
 
     return schema_df
+
+def extract_from(query:str):
+    tablename = (query.lower()
+                      .split("from")[-1]
+                      .strip(" ")
+                      .split(" ")[0]
+                      .strip(" "))
+    return tablename
+
+
+def add_generic_from(query:str, generic_from="df"):
+    tablename = extract_from(query)
+    query = query.replace(tablename, generic_from)
+    return query
+
+
+def add_fields(query:str, fields:list):
+    select = query.split("FROM")[0].strip(" \n")
+    fields = ",\n".join(fields)
+    from_query = f"\n\nFROM{query.split('FROM')[-1]}"
+    query_new = f"{select},\n{fields}{from_query}"
+    return query_new
+
+
+def format_query_cdf(query:str, from_table:str):
+    fields = ["_change_type", "_commit_version", "_commit_timestamp"]
+    query = add_fields(query=query, fields=fields)
+    query = add_generic_from(query=query, generic_from=from_table)
+    return query
