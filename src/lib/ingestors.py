@@ -76,9 +76,32 @@ class IngestorCDC(Ingestor):
         return df
     
     def save(self, df):
+        catalog = self.catalog
+        schemaname = self.schemaname
+        tablename = self.tablename
+        id_field = self.id_field
+        timestamp_field = self.timestamp_field
+
+        def _upsert(df, batchID):
+            spark = df.sparkSession
+            df.createOrReplaceGlobalTempView(f"view_{tablename}")
+            query = f'''
+            SELECT *
+            FROM global_temp.view_{tablename}
+            QUALIFY ROW_NUMBER() OVER(PARTITION BY {id_field} ORDER BY {timestamp_field} DESC) = 1
+            '''
+            df_cdc = spark.sql(query)
+            (delta.DeltaTable.forName(spark, f"{catalog}.{schemaname}.{tablename}")
+                             .alias("b")
+                             .merge(df_cdc.alias("d"), f"b.{id_field} = d.{id_field}")
+                             .whenMatchedDelete(condition="d._operation = 'DELETE'")
+                             .whenMatchedUpdateAll(condition="d._operation = 'UPDATE'")
+                             .whenNotMatchedInsertAll(condition="d._operation = 'INSERT' OR d._operation = 'UPDATE'")
+                             .execute())
+
         stream = (df.writeStream
-                    .option("checkpointLocation", f"/Volumes/raw/{self.schemaname}/cdc/{self.tablename}/_checkpoints/")
-                    .foreachBatch(lambda df, batchID: self.upsert(df))
+                    .option("checkpointLocation", f"/Volumes/raw/{schemaname}/cdc/{tablename}/_checkpoints/")
+                    .foreachBatch(_upsert)
                     .trigger(availableNow=True))
         return stream.start()
 
