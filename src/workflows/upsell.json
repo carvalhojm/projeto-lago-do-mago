@@ -74,7 +74,9 @@
         "notebook_task": {
           "notebook_path": "src/silver/ingestao",
           "base_parameters": {
-            "tablename": "clientes"
+            "tablename": "clientes",
+            "id_field": "idCliente",
+            "id_field_old": "idCliente"
           },
           "source": "GIT"
         },
@@ -95,7 +97,9 @@
         "notebook_task": {
           "notebook_path": "src/silver/ingestao",
           "base_parameters": {
-            "tablename": "transacoes"
+            "tablename": "transacoes",
+            "id_field": "IdTransacao",
+            "id_field_old": "IdTransacao"
           },
           "source": "GIT"
         },
@@ -116,7 +120,9 @@
         "notebook_task": {
           "notebook_path": "src/silver/ingestao",
           "base_parameters": {
-            "tablename": "transacao_produto"
+            "tablename": "transacao_produto",
+            "id_field": "idTransacaoProduto",
+            "id_field_old": "idTransacaoProduto"
           },
           "source": "GIT"
         },
@@ -137,7 +143,9 @@
         "notebook_task": {
           "notebook_path": "src/silver/ingestao",
           "base_parameters": {
-            "tablename": "produtos"
+            "tablename": "produtos",
+            "id_field": "IdProduto",
+            "id_field_old": "IdProduto"
           },
           "source": "GIT"
         },
