@@ -140,9 +140,39 @@ class IngestorCDF(IngestorCDC):
         return df
     
     def save(self, df):
+        idfield_old = self.idfield_old
+        tablename = self.tablename
+        query = self.query
+        id_field = self.id_field
+        catalog = self.catalog
+        schemaname = self.schemaname
+
+        def _upsert(df_batch, batchID):
+            spark = df_batch.sparkSession
+            df_batch.createOrReplaceGlobalTempView(f"silver_{tablename}")
+
+            query_last = f"""
+            SELECT *
+            FROM global_temp.silver_{tablename}
+            WHERE _change_type <> 'update_preimage'
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY {idfield_old} ORDER BY _commit_timestamp DESC) = 1
+            """
+            df_last = spark.sql(query_last)
+            df_upsert = spark.sql(query, df=df_last)
+            df_upsert.createOrReplaceGlobalTempView(f"upsert_{tablename}")
+
+            spark.sql(f"""
+                MERGE INTO {catalog}.{schemaname}.{tablename} s
+                USING global_temp.upsert_{tablename} d
+                ON s.{id_field} = d.{id_field}
+                WHEN MATCHED AND d._change_type = 'delete' THEN DELETE
+                WHEN MATCHED AND d._change_type = 'update_postimage' THEN UPDATE SET *
+                WHEN NOT MATCHED AND (d._change_type = 'insert' OR d._change_type = 'update_postimage') THEN INSERT *
+            """)
+
         stream = (df.writeStream
                     .option("checkpointLocation", self.checkpoint_location)
-                    .foreachBatch(lambda df, batchID: self.upsert(df) )
+                    .foreachBatch(_upsert)
                     .trigger(availableNow=True))
         return stream.start()
     
