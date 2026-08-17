@@ -91,13 +91,15 @@ class IngestorCDC(Ingestor):
             QUALIFY ROW_NUMBER() OVER(PARTITION BY {id_field} ORDER BY {timestamp_field} DESC) = 1
             '''
             df_cdc = spark.sql(query)
-            (delta.DeltaTable.forName(spark, f"{catalog}.{schemaname}.{tablename}")
-                             .alias("b")
-                             .merge(df_cdc.alias("d"), f"b.{id_field} = d.{id_field}")
-                             .whenMatchedDelete(condition="d._operation = 'DELETE'")
-                             .whenMatchedUpdateAll(condition="d._operation = 'UPDATE'")
-                             .whenNotMatchedInsertAll(condition="d._operation = 'INSERT' OR d._operation = 'UPDATE'")
-                             .execute())
+            df_cdc.createOrReplaceGlobalTempView(f"view_cdc_{tablename}")
+            spark.sql(f"""
+                MERGE INTO {catalog}.{schemaname}.{tablename} b
+                USING global_temp.view_cdc_{tablename} d
+                ON b.{id_field} = d.{id_field}
+                WHEN MATCHED AND d._operation = 'DELETE' THEN DELETE
+                WHEN MATCHED AND d._operation = 'UPDATE' THEN UPDATE SET *
+                WHEN NOT MATCHED AND (d._operation = 'INSERT' OR d._operation = 'UPDATE') THEN INSERT *
+            """)
 
         stream = (df.writeStream
                     .option("checkpointLocation", f"/Volumes/raw/{schemaname}/cdc/{tablename}/_checkpoints/")
