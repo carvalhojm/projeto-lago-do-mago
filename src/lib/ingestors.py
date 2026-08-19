@@ -13,7 +13,7 @@ class Ingestor:
 
     def set_schema(self):
         self.data_schema = utils.import_schema(self.tablename)
-
+    
     def load(self, path):
         df = (self.spark
                   .read
@@ -21,10 +21,9 @@ class Ingestor:
                   .schema(self.data_schema)
                   .load(path))
         return df
-
+        
     def save(self, df):
-        (df.coalesce(1)
-           .write
+        (df.write
            .format("delta")
            .mode("overwrite")
            .saveAsTable(f"{self.catalog}.{self.schemaname}.{self.tablename}"))
@@ -50,11 +49,10 @@ class IngestorCDC(Ingestor):
     def upsert(self, df):
 
         df.createOrReplaceGlobalTempView(f"view_{self.tablename}")
-        
         query = f'''
-        SELECT *
-        FROM global_temp.view_{self.tablename}
-        QUALIFY ROW_NUMBER() OVER(PARTITION BY {self.id_field} ORDER BY {self.timestamp_field} DESC) = 1
+            SELECT *
+            FROM global_temp.view_{self.tablename}
+            QUALIFY ROW_NUMBER() OVER (PARTITION BY {self.id_field} ORDER BY {self.timestamp_field} DESC) = 1
         '''
 
         df_cdc = self.spark.sql(query)
@@ -70,42 +68,18 @@ class IngestorCDC(Ingestor):
         df = (self.spark
                   .readStream
                   .format("cloudFiles")
-                  .option("cloudFiles.format",self.format)
+                  .option("cloudFiles.format", self.format)
                   .schema(self.data_schema)
                   .load(path))
         return df
-    
+
     def save(self, df):
-        catalog = self.catalog
-        schemaname = self.schemaname
-        tablename = self.tablename
-        id_field = self.id_field
-        timestamp_field = self.timestamp_field
-
-        def _upsert(df, batchID):
-            spark = df.sparkSession
-            df.createOrReplaceGlobalTempView(f"view_{tablename}")
-            query = f'''
-            SELECT *
-            FROM global_temp.view_{tablename}
-            QUALIFY ROW_NUMBER() OVER(PARTITION BY {id_field} ORDER BY {timestamp_field} DESC) = 1
-            '''
-            df_cdc = spark.sql(query)
-            df_cdc.createOrReplaceGlobalTempView(f"view_cdc_{tablename}")
-            spark.sql(f"""
-                MERGE INTO {catalog}.{schemaname}.{tablename} b
-                USING global_temp.view_cdc_{tablename} d
-                ON b.{id_field} = d.{id_field}
-                WHEN MATCHED AND d._operation = 'DELETE' THEN DELETE
-                WHEN MATCHED AND d._operation = 'UPDATE' THEN UPDATE SET *
-                WHEN NOT MATCHED AND (d._operation = 'INSERT' OR d._operation = 'UPDATE') THEN INSERT *
-            """)
-
         stream = (df.writeStream
-                    .option("checkpointLocation", f"/Volumes/raw/{schemaname}/cdc/{tablename}/_checkpoints/")
-                    .foreachBatch(_upsert)
-                    .trigger(availableNow=True))
+                   .option("checkpointLocation", f"/Volumes/raw/{self.schemaname}/cdc/{self.tablename}/_checkpoints/")
+                   .foreachBatch(lambda df, batchID: self.upsert(df))
+                   .trigger(availableNow=True))
         return stream.start()
+
 
 class IngestorCDF(IngestorCDC):
 
@@ -140,39 +114,9 @@ class IngestorCDF(IngestorCDC):
         return df
     
     def save(self, df):
-        idfield_old = self.idfield_old
-        tablename = self.tablename
-        query = self.query
-        id_field = self.id_field
-        catalog = self.catalog
-        schemaname = self.schemaname
-
-        def _upsert(df_batch, batchID):
-            spark = df_batch.sparkSession
-            df_batch.createOrReplaceGlobalTempView(f"silver_{tablename}")
-
-            query_last = f"""
-            SELECT *
-            FROM global_temp.silver_{tablename}
-            WHERE _change_type <> 'update_preimage'
-            QUALIFY ROW_NUMBER() OVER (PARTITION BY {idfield_old} ORDER BY _commit_timestamp DESC) = 1
-            """
-            df_last = spark.sql(query_last)
-            df_upsert = spark.sql(query, df=df_last)
-            df_upsert.createOrReplaceGlobalTempView(f"upsert_{tablename}")
-
-            spark.sql(f"""
-                MERGE INTO {catalog}.{schemaname}.{tablename} s
-                USING global_temp.upsert_{tablename} d
-                ON s.{id_field} = d.{id_field}
-                WHEN MATCHED AND d._change_type = 'delete' THEN DELETE
-                WHEN MATCHED AND d._change_type = 'update_postimage' THEN UPDATE SET *
-                WHEN NOT MATCHED AND (d._change_type = 'insert' OR d._change_type = 'update_postimage') THEN INSERT *
-            """)
-
         stream = (df.writeStream
                     .option("checkpointLocation", self.checkpoint_location)
-                    .foreachBatch(_upsert)
+                    .foreachBatch(lambda df, batchID: self.upsert(df) )
                     .trigger(availableNow=True))
         return stream.start()
     
