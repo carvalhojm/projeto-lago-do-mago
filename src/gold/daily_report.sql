@@ -1,4 +1,5 @@
 SELECT DATE(t1.DtCriacao) AS dtRef,
+        t2.IdProduto,
         CASE
             WHEN t2.IdProduto = '1' THEN 'Airflow Lover'
             WHEN t2.IdProduto = '2' THEN 'Comida'
@@ -138,5 +139,6 @@ ON t1.IdTransacao = t2.IdTransacao
 
 WHERE DATE(t1.DtCriacao) = '{dt_ref}'
 
-GROUP BY dtref, descNomeProduto GROUPING SETS ((dtref, descNomeProduto), (dtref))
+GROUP BY DATE(t1.DtCriacao), t2.IdProduto 
+GROUPING SETS ((DATE(t1.DtCriacao), t2.IdProduto), (DATE(t1.DtCriacao)))
 ORDER BY dtref
