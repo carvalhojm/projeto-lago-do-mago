@@ -154,6 +154,32 @@
         "email_notifications": {},
         "webhook_notifications": {},
         "disabled": false
+      },
+      {
+        "task_key": "gold_daily_report",
+        "depends_on": [
+          {
+            "task_key": "silver_transacoes"
+          },
+          {
+            "task_key": "silver_transacao_produto"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/gold/ingestao",
+          "base_parameters": {
+            "tablename": "daily_report",
+            "dt_start": "{{job.start_time.iso_date}}",
+            "dt_stop": "{{job.start_time.iso_date}}"
+          },
+          "source": "GIT"
+        },
+        "job_cluster_key": "upsell_cluster",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
       }
     ],
     "job_clusters": [
@@ -177,7 +203,7 @@
             "ebs_volume_size": 32
           },
           "node_type_id": "m5.large",
-          "driver_node_type_id": "m5.xlarge",
+          "driver_node_type_id": "m5.large",
           "enable_elastic_disk": false,
           "data_security_mode": "DATA_SECURITY_MODE_DEDICATED",
           "kind": "CLASSIC_PREVIEW",
