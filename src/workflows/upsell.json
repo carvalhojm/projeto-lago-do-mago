@@ -21,7 +21,7 @@
           },
           "source": "GIT"
         },
-        "existing_cluster_id": "0809-133525-0u45ias2",
+        "job_cluster_key": "upsell_cluster",
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
@@ -39,7 +39,7 @@
           },
           "source": "GIT"
         },
-        "existing_cluster_id": "0809-133525-0u45ias2",
+        "job_cluster_key": "upsell_cluster",
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
@@ -57,7 +57,7 @@
           },
           "source": "GIT"
         },
-        "existing_cluster_id": "0809-133525-0u45ias2",
+        "job_cluster_key": "upsell_cluster",
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
@@ -80,53 +80,7 @@
           },
           "source": "GIT"
         },
-        "existing_cluster_id": "0809-133525-0u45ias2",
-        "timeout_seconds": 0,
-        "email_notifications": {},
-        "webhook_notifications": {},
-        "disabled": false
-      },
-      {
-        "task_key": "silver_transacoes",
-        "depends_on": [
-          {
-            "task_key": "bronze_transacoes"
-          }
-        ],
-        "run_if": "ALL_SUCCESS",
-        "notebook_task": {
-          "notebook_path": "src/silver/ingestao",
-          "base_parameters": {
-            "tablename": "transacoes",
-            "id_field": "IdTransacao",
-            "id_field_old": "IdTransacao"
-          },
-          "source": "GIT"
-        },
-        "existing_cluster_id": "0809-133525-0u45ias2",
-        "timeout_seconds": 0,
-        "email_notifications": {},
-        "webhook_notifications": {},
-        "disabled": false
-      },
-      {
-        "task_key": "silver_transacao_produto",
-        "depends_on": [
-          {
-            "task_key": "bronze_transacao_produto"
-          }
-        ],
-        "run_if": "ALL_SUCCESS",
-        "notebook_task": {
-          "notebook_path": "src/silver/ingestao",
-          "base_parameters": {
-            "tablename": "transacao_produto",
-            "id_field": "idTransacaoProduto",
-            "id_field_old": "idTransacaoProduto"
-          },
-          "source": "GIT"
-        },
-        "existing_cluster_id": "0809-133525-0u45ias2",
+        "job_cluster_key": "upsell_cluster",
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
@@ -149,11 +103,87 @@
           },
           "source": "GIT"
         },
-        "existing_cluster_id": "0809-133525-0u45ias2",
+        "job_cluster_key": "upsell_cluster",
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
         "disabled": false
+      },
+      {
+        "task_key": "silver_transacao_produto",
+        "depends_on": [
+          {
+            "task_key": "bronze_transacao_produto"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "transacao_produto",
+            "id_field": "idTransacaoProduto",
+            "id_field_old": "idTransacaoProduto"
+          },
+          "source": "GIT"
+        },
+        "job_cluster_key": "upsell_cluster",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      },
+      {
+        "task_key": "silver_transacoes",
+        "depends_on": [
+          {
+            "task_key": "bronze_transacoes"
+          }
+        ],
+        "run_if": "ALL_SUCCESS",
+        "notebook_task": {
+          "notebook_path": "src/silver/ingestao",
+          "base_parameters": {
+            "tablename": "transacoes",
+            "id_field": "IdTransacao",
+            "id_field_old": "IdTransacao"
+          },
+          "source": "GIT"
+        },
+        "job_cluster_key": "upsell_cluster",
+        "timeout_seconds": 0,
+        "email_notifications": {},
+        "webhook_notifications": {},
+        "disabled": false
+      }
+    ],
+    "job_clusters": [
+      {
+        "job_cluster_key": "upsell_cluster",
+        "new_cluster": {
+          "spark_version": "17.3.x-scala2.13",
+          "spark_conf": {
+            "spark.master": "local[*]",
+            "spark.databricks.delta.autoCompact.enabled": "true",
+            "spark.databricks.delta.optimizeWrites.enabled": "true",
+            "spark.databricks.delta.properties.defaults.enableChangeDataFeed": "True"
+          },
+          "aws_attributes": {
+            "first_on_demand": 1,
+            "availability": "SPOT_WITH_FALLBACK",
+            "zone_id": "auto",
+            "spot_bid_price_percent": 100,
+            "ebs_volume_type": "GENERAL_PURPOSE_SSD",
+            "ebs_volume_count": 1,
+            "ebs_volume_size": 32
+          },
+          "node_type_id": "m5.large",
+          "driver_node_type_id": "m5.xlarge",
+          "enable_elastic_disk": false,
+          "data_security_mode": "DATA_SECURITY_MODE_DEDICATED",
+          "kind": "CLASSIC_PREVIEW",
+          "is_single_node": false,
+          "num_workers": 0
+        }
       }
     ],
     "git_source": {
