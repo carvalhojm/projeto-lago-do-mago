@@ -176,6 +176,13 @@
           "source": "GIT"
         },
         "job_cluster_key": "upsell_cluster",
+        "libraries": [
+          {
+            "pypi": {
+              "package": "tqdm"
+            }
+          }
+        ],
         "timeout_seconds": 0,
         "email_notifications": {},
         "webhook_notifications": {},
@@ -186,6 +193,7 @@
       {
         "job_cluster_key": "upsell_cluster",
         "new_cluster": {
+          "cluster_name": "",
           "spark_version": "17.3.x-scala2.13",
           "spark_conf": {
             "spark.master": "local[*]",
