@@ -1,5 +1,6 @@
 import json
 from pyspark.sql import types
+import datetime
 
 def import_query(path):
     with open(path, "r") as open_file:
