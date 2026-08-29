@@ -1,5 +1,7 @@
+!pip install tqdm
 import delta
 import utils
+import tqdm
 
 class Ingestor:
   
