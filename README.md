@@ -7,53 +7,53 @@ Projeto de engenharia de dados desenvolvido a partir do curso do [Teo Me Why](ht
 ### Arquitetura
 
 ```
-      ┌─────────────────┐
-      │ SISTEMA DE      │
-      │ ORIGEM          │
-      └────────┬────────┘
-               │
-              CDC
-               ▼
-            ┌──────┐
-            │ RAW  │
-            └──┬───┘
-               │
-        Auto Loader
-               │
-           Streaming
-               ▼
-         ┌───────────┐
-         │  BRONZE   │
-         └─────┬─────┘
-               │
-              CDF
-               │
-           Streaming
-               ▼
-         ┌───────────┐
-         │  SILVER   │
-         └─────┬─────┘
-               │
-      regras analíticas
-               │
-               ▼
-         ┌───────────┐
-         │   GOLD    │
-         └─────┬─────┘
-               │
-   ┌───────────┴───────────┐
-   │                       │
-DAILY                   MONTHLY
-   │                       │
-   └───────────┬───────────┘
-               │
-          CUBOS / SQL
-               │
-               ▼
-      DASH EXECUTIVO
-               │
-               ▼
-           NEGÓCIO
+                        ┌─────────────────┐
+                        │ SISTEMA DE      │
+                        │ ORIGEM          │
+                        └────────┬────────┘
+                                 │
+                                CDC
+                                 ▼
+                              ┌──────┐
+                              │ RAW  │
+                              └──┬───┘
+                                 │
+                          Auto Loader
+                                 │
+                             Streaming
+                                 ▼
+                           ┌───────────┐
+                           │  BRONZE   │
+                           └─────┬─────┘
+                                 │
+                                CDF
+                                 │
+                             Streaming
+                                 ▼
+                           ┌───────────┐
+                           │  SILVER   │
+                           └─────┬─────┘
+                                 │
+                        regras analíticas
+                                 │
+                                 ▼
+                           ┌───────────┐
+                           │   GOLD    │
+                           └─────┬─────┘
+                                 │
+                     ┌───────────┴───────────┐
+                     │                       │
+                  DAILY                   MONTHLY
+                     │                       │
+                     └───────────┬───────────┘
+                                 │
+                            CUBOS / SQL
+                                 │
+                                 ▼
+                        DASH EXECUTIVO
+                                 │
+                                 ▼
+                             NEGÓCIO
 ```
 
 O job `upsell` orquestra as tarefas de cada camada, levando os dados de clientes, transações e produtos por transação do bronze até os relatórios gold diário e mensal.
